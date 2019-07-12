@@ -1,0 +1,33 @@
+Step 1 – Starting ELK Docker Container
+
+1) There is a docker image already with name sebp/elk 
+https://hub.docker.com/r/sebp/elk/
+2) For this docker container to run , we need to set vm.max_map_count to at least
+262144.
+so, do the following : docker-machine ssh
+you will be connected to the docker vm machine.
+Execute sudo sysctl vm.max_map_count=262144
+3) pull the docker image using -> docker pull sebp/elk
+4) Run the elk container using
+docker run -p 5601:5601 -p 9200:9200 -p 5044:5044 -p 5000:5000 -it --name elk sebp/elk
+This command publishes the following ports, which are needed for proper operation of
+the ELK stack:
+5601 (Kibana web interface).
+9200 (Elasticsearch JSON interface).
+5044 (Logstash Beats interface, receives logs from Beats such as Filebeat )
+We will be using 5000 port for sending logs to logstash from our application later
+5) You can now access kibana at http://192.168.99.100:5601
+Following are optional . If you have more time, you can follow. Otherwise go to STEP2.
+6) Creating dummy log entries using logstash
+First get the elk container id by executing the following command :
+docker ps
+docker exec -it <container-id> bash
+At the command prompt , execute the following
+cd /opt/logstash/bin
+./ logstash -e 'input { stdin { } } output { elasticsearch { hosts => ["localhost"] } }'
+Wait for Logstash to start (as indicated by the message Logstash startup completed),
+then type some dummy text followed by Enter to create a log entry
+Create 10 dummy entries
+7) You Can search index elasticsearch using below URL:
+http://198.168.99.100:9200/_search?pretty
+8) You can now visit kibana web interface at http://192.168.99.100:5601
